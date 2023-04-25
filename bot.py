@@ -52,7 +52,7 @@ if not os.path.exists("downloads"):
     os.makedirs("downloads")
 
 
-@app.on_message(filters.video & filters.user(OWNER_ID))
+@app.on_message(filters.video | filters.document & filters.user(OWNER_ID))
 async def converter(client, message):
     global ongoing_task
     if ongoing_task:
