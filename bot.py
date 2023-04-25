@@ -1,17 +1,10 @@
-import os
-
-from sys import executable
-import socket
-import signal
 import asyncio
 from pyrogram import Client, filters
 import subprocess
 import glob
-
 import psutil
-from pyrogram.errors.exceptions.bad_request_400 import MessageNotModified
 import pyrogram
-from pyrogram.types import *
+import os
 API_ID = 
 API_HASH = ""
 BOT_TOKEN = ""
@@ -19,8 +12,6 @@ LOG_CHANNEL = ""
 OWNER_ID = 
 app = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 ongoing_task = False
-
-
 
 @app.on_message(
     filters.command("start") & (filters.user(OWNER_ID) | filters.chat(LOG_CHANNEL))
@@ -33,24 +24,8 @@ async def start(client, message):
             chat_id=message.chat.id,
             text="Send me a video file",
         )
-
-
-
-
-
-@app.on_message(filters.command("stats") & filters.user(OWNER_ID))
-async def stats(client, message):
-    cpu_percent = psutil.cpu_percent(interval=0.5)
-    memory = psutil.virtual_memory()
-    await client.send_message(
-        chat_id=message.chat.id,
-        text=f"<b>CPU:</b> {cpu_percent}%\n" f"<b>RAM:</b> {memory.percent}%\n",
-    )
-
-
 if not os.path.exists("downloads"):
     os.makedirs("downloads")
-
 
 @app.on_message(filters.video | filters.document & filters.user(OWNER_ID))
 async def converter(client, message):
@@ -63,7 +38,6 @@ async def converter(client, message):
     ongoing_task = True
     file_id = message.document.file_id if message.document else message.video.file_id
     file_name = message.document.file_name if message.document else message.video.file_name
- 
     username = message.from_user.username
     name = message.from_user.first_name
     id = message.from_user.id
@@ -76,9 +50,9 @@ async def converter(client, message):
             video=file_id,
             caption=f"{file_name}\n\n<b>#cc</b>: @{username} (<code>{name}</code> (<code>{id}</code>))",
         )
-            channel_message=await message.reply_text (f"Successfully forwarded {file_name} to log channel")
+            await message.reply_text (f"Successfully forwarded {file_name} to log channel")
         except Exception as e:
-            await channel_message.edit_text ("Cannot Forward file to Log Channel" +str(e))
+            await message.reply_text (f"Cannot Forward {file_name} to Log Channel.Make sure to send /start command in the log channel" +str(e))
         
         try:
             download_message=await message.reply_text("starting download...")
@@ -87,7 +61,6 @@ async def converter(client, message):
                 mb_total = total / 1000000
                 print(f"{current * 100 / total:.1f}%")
                 percent = current * 100 / total
-                
                 await download_message.edit_text(f"Downloaded {mb_current} out of {mb_total} MB ({percent:.1f}%)")
             await message.download(file_name, progress=progress)
             print("File downloaded successfully")
@@ -105,9 +78,9 @@ async def converter(client, message):
             document=file_id,
             caption=f"{file_name}\n\n<b>#cc</b>: @{username} (<code>{name}</code> (<code>{id}</code>))",
         )
-            channel_message=await message.reply_text(f"Successfully forwarded {file_name} to log channel")
+            await message.reply_text(f"Successfully forwarded {file_name} to log channel")
         except Exception as e:
-            await channel_message.edit_text ("Cannot Forward file to Log Channel" +str(e))
+            await message.reply_text(f"Cannot Forward {file_name} to Log Channel.Make sure to send /start command in the log channel" +str(e))
             
         try:
            download_message=await message.reply_text("starting download...")
